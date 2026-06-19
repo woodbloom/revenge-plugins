@@ -14,6 +14,7 @@ Built with security at the core — encrypted storage, network monitoring and fu
 | [TokenGuard](plugins/TokenGuard/README.md) | Monitors network requests and alerts when your token is sent to an unknown URL | `https://woodbloom.github.io/revenge-plugins/TokenGuard/` |
 | [Proxifier](plugins/Proxifier/README.md) | Route Discord through a custom proxy — hides your real IP and bypasses network blocks | `https://woodbloom.github.io/revenge-plugins/Proxifier/` |
 | [MessageVault](plugins/MessageVault/README.md) | A local message logger — deleted messages stay visible (struck through), edits are saved before/after | `https://woodbloom.github.io/revenge-plugins/MessageVault/` |
+| [Plugin Loader](plugins/PluginLoader/README.md) | Install, update and manage every plugin in this table from one screen | `https://woodbloom.github.io/revenge-plugins/PluginLoader/` |
 
 ---
 
