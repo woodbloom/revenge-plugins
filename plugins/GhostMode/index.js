@@ -2,7 +2,8 @@ import { after, before } from "@vendetta/patcher";
 import { findByProps, findByDisplayName, findByStoreName } from "@vendetta/metro";
 import { findInReactTree } from "@vendetta/utils";
 import { React, ReactNative } from "@vendetta/metro/common";
-import { storage, useProxy } from "@vendetta/plugin";
+import { storage } from "@vendetta/plugin";
+import { useProxy } from "@vendetta/storage";
 import { showToast } from "@vendetta/ui/toasts";
 import GhostModeSettings from "./Settings.js";
 

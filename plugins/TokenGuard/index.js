@@ -1,4 +1,5 @@
-import { storage, useProxy } from "@vendetta/plugin";
+import { storage } from "@vendetta/plugin";
+import { useProxy } from "@vendetta/storage";
 import { findByProps, findByStoreName } from "@vendetta/metro";
 import { showToast } from "@vendetta/ui/toasts";
 import { showConfirmationAlert } from "@vendetta/ui/alerts";

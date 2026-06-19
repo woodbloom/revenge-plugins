@@ -1,5 +1,5 @@
 import { React, ReactNative } from "@vendetta/metro/common";
-import { useProxy } from "@vendetta/plugin";
+import { useProxy } from "@vendetta/storage";
 import { showToast } from "@vendetta/ui/toasts";
 import { showConfirmationAlert } from "@vendetta/ui/alerts";
 

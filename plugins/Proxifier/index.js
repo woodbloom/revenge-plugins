@@ -1,4 +1,5 @@
-import { storage, useProxy } from "@vendetta/plugin";
+import { storage } from "@vendetta/plugin";
+import { useProxy } from "@vendetta/storage";
 import { after } from "@vendetta/patcher";
 import { findByDisplayName } from "@vendetta/metro";
 import { findInReactTree } from "@vendetta/utils";
