@@ -1,0 +1,7 @@
+{
+  "name": "Plugin Loader — by woodbloom",
+  "description": "Install, update and manage every woodbloom plugin from one screen — no more copy-pasting install links one by one.",
+  "authors": [{ "name": "woodbloom", "id": "793935599702507542" }],
+  "main": "./index.js",
+  "vendetta": { "icon": "ic_download_24px" }
+}

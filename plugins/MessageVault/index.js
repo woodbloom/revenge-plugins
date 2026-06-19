@@ -1,4 +1,5 @@
 import { storage } from "@vendetta/plugin";
+import { React } from "@vendetta/metro/common";
 import { findByProps, findByStoreName } from "@vendetta/metro";
 import { before } from "@vendetta/patcher";
 import MessageVaultSettings from "./Settings.js";
@@ -93,7 +94,7 @@ function snapshotAuthor(msg) {
   };
 }
 
-export const settings = MessageVaultSettings;
+export const settings = (props) => React.createElement(MessageVaultSettings, { ...props, storage });
 
 export function onLoad() {
   unpatchSidebar = patchSidebar();

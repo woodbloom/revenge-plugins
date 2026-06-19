@@ -121,7 +121,7 @@ function tryPatchYouBar() {
   return false;
 }
 
-export const settings = GhostModeSettings;
+export const settings = (props) => React.createElement(GhostModeSettings, { ...props, storage });
 
 export function onLoad() {
   // Block typing indicator

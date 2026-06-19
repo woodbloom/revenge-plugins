@@ -1,4 +1,5 @@
 import { storage } from "@vendetta/plugin";
+import { React } from "@vendetta/metro/common";
 import { useProxy } from "@vendetta/storage";
 import { findByProps, findByStoreName } from "@vendetta/metro";
 import { showToast } from "@vendetta/ui/toasts";
@@ -123,7 +124,7 @@ function uninstallFetchPatch() {
   _installed = false;
 }
 
-export const settings = TokenGuardSettings;
+export const settings = (props) => React.createElement(TokenGuardSettings, { ...props, storage });
 
 export function onLoad() {
   installFetchPatch();
