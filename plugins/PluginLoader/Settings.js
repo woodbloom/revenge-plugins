@@ -35,6 +35,10 @@ const CATALOG = [
   { key: "FriendWatch", emoji: "👋", title: "FriendWatch", desc: "Logs friend adds/removes locally — see exactly who unfriended you." },
   { key: "GuildWatch", emoji: "🏠", title: "GuildWatch", desc: "Logs server joins/leaves & warns when a server suddenly renames/re-icons." },
   { key: "MentionLog", emoji: "🔔", title: "MentionLog", desc: "Keeps a local record of every mention, even ones that get deleted." },
+  { key: "PresenceSpy", emoji: "🟢", title: "PresenceSpy", desc: "Get notified the moment a tracked user comes online, goes offline, or changes status." },
+  { key: "NicknameHistory", emoji: "✏️", title: "NicknameHistory", desc: "Records nickname & username changes so you can look up what someone used to be called." },
+  { key: "EmojiStats", emoji: "📊", title: "EmojiStats", desc: "Tracks your own message stats — counts, top servers, most-used custom emoji." },
+  { key: "TimestampHelper", emoji: "🕐", title: "TimestampHelper", desc: "/timestamp command to generate Discord timestamp markup from a relative time." },
 ].map(p => ({ ...p, url: `${BASE_URL}/${p.key}/` }));
 
 function PluginRow({ entry, busy, onInstall, onToggle, onReinstall }) {
