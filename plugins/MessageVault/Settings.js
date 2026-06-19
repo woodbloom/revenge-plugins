@@ -5,10 +5,11 @@ import { showConfirmationAlert } from "@vendetta/ui/alerts";
 import { findByStoreName } from "@vendetta/metro";
 import { decryptText } from "./CryptoUtils.js";
 import { exportChannelChat } from "./ChatExport.js";
+import { getFriends, openDMChannel } from "./Friends.js";
 
 const SelectedChannelStore = findByStoreName("SelectedChannelStore");
 
-const { View, Text, Switch, ScrollView, TouchableOpacity, TextInput } = ReactNative;
+const { View, Text, Switch, ScrollView, TouchableOpacity, TextInput, Image } = ReactNative;
 
 const ROW = {
   flexDirection: "row", alignItems: "center", justifyContent: "space-between",
@@ -103,8 +104,13 @@ export default function MessageVaultSettings({ storage }) {
   });
   const [includeMedia, setIncludeMedia] = React.useState(true);
   const [maxMessages, setMaxMessages] = React.useState("1000");
+  const [exportAll, setExportAll] = React.useState(false);
   const [exporting, setExporting] = React.useState(false);
   const [exportStatus, setExportStatus] = React.useState("");
+  const [showFriends, setShowFriends] = React.useState(false);
+  const [friends, setFriends] = React.useState([]);
+  const [friendFilter, setFriendFilter] = React.useState("");
+  const [resolvingFriend, setResolvingFriend] = React.useState(false);
 
   const deleteEntry = (id) => {
     s.log = (s.log || []).filter(e => e.id !== id);
@@ -169,16 +175,17 @@ export default function MessageVaultSettings({ storage }) {
     });
   };
 
-  const runExport = async () => {
-    const channelId = exportChannelId.trim();
+  const runExport = async (channelIdOverride, forceAll) => {
+    const channelId = (channelIdOverride ?? exportChannelId).trim();
     if (!channelId) { showToast("Enter a channel ID first", 0); return; }
 
+    const all = forceAll || exportAll;
     setExporting(true);
     setExportStatus("Starting…");
     try {
       const result = await exportChannelChat(channelId, {
         includeMedia,
-        maxMessages: Math.max(1, Math.min(10000, parseInt(maxMessages, 10) || 1000)),
+        maxMessages: all ? Infinity : Math.max(1, Math.min(10000, parseInt(maxMessages, 10) || 1000)),
         onProgress: p => {
           if (p.phase === "fetching") setExportStatus(`Fetching messages… (${p.count})`);
           else if (p.phase === "media") setExportStatus(`Downloading media… (${p.count}/${p.total})`);
@@ -194,17 +201,43 @@ export default function MessageVaultSettings({ storage }) {
     }
   };
 
-  const startExport = () => {
+  const startExport = (channelIdOverride, forceAll) => {
+    const all = forceAll || exportAll;
     showConfirmationAlert({
       title: "⚠️ Export warning",
-      content: includeMedia
-        ? "This downloads the channel's message history plus all images/videos into a ZIP file. Media-heavy or long chats can take a while and use a fair amount of storage and data."
-        : "This downloads the channel's message history into a ZIP file (text only).",
+      content: all
+        ? "This downloads the ENTIRE message history (no limit) — for long or media-heavy chats this can take a long time and use a lot of storage and data."
+        : includeMedia
+          ? "This downloads the channel's message history plus all images/videos into a ZIP file. Media-heavy or long chats can take a while and use a fair amount of storage and data."
+          : "This downloads the channel's message history into a ZIP file (text only).",
       confirmText: "Start export",
       cancelText: "Cancel",
-      onConfirm: runExport,
+      onConfirm: () => runExport(channelIdOverride, forceAll),
     });
   };
+
+  const toggleFriendPicker = () => {
+    if (!showFriends) { setFriends(getFriends()); setFriendFilter(""); }
+    setShowFriends(v => !v);
+  };
+
+  const selectFriend = async (friend) => {
+    setShowFriends(false);
+    setResolvingFriend(true);
+    try {
+      const channelId = await openDMChannel(friend.id);
+      setExportChannelId(channelId);
+      startExport(channelId, true);
+    } catch (e) {
+      showToast(`Couldn't open DM with ${friend.username}: ${e?.message || e}`, 0);
+    } finally {
+      setResolvingFriend(false);
+    }
+  };
+
+  const visibleFriends = friends
+    .filter(f => f.username.toLowerCase().includes(friendFilter.toLowerCase()))
+    .slice(0, 50);
 
   return React.createElement(ScrollView, { style: { flex: 1 } },
 
@@ -321,18 +354,78 @@ export default function MessageVaultSettings({ storage }) {
             borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 13, marginBottom: 10,
           },
         }),
+
+        React.createElement(TouchableOpacity, {
+          disabled: exporting || resolvingFriend,
+          onPress: toggleFriendPicker,
+          style: {
+            backgroundColor: "rgba(255,255,255,0.07)",
+            borderRadius: 8, paddingVertical: 10, alignItems: "center", marginBottom: showFriends ? 8 : 10,
+          },
+        },
+          React.createElement(Text, { style: { color: "#fff", fontWeight: "600", fontSize: 13 } },
+            resolvingFriend ? "Opening DM…" : (showFriends ? "✕ Close friend list" : "👥 Pick a friend instead")
+          )
+        ),
+
+        showFriends && React.createElement(View, { style: { marginBottom: 10 } },
+          React.createElement(TextInput, {
+            value: friendFilter,
+            onChangeText: setFriendFilter,
+            placeholder: "Search friends…",
+            placeholderTextColor: "#666",
+            style: {
+              color: "#fff", backgroundColor: "rgba(255,255,255,0.07)",
+              borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 13, marginBottom: 6,
+            },
+          }),
+          visibleFriends.length === 0
+            ? React.createElement(Text, { style: { color: "#666", fontSize: 12, padding: 8, textAlign: "center" } }, "No friends found")
+            : React.createElement(View, { style: { maxHeight: 260 } },
+                React.createElement(ScrollView, { nestedScrollEnabled: true },
+                  visibleFriends.map(friend =>
+                    React.createElement(TouchableOpacity, {
+                      key: friend.id,
+                      onPress: () => selectFriend(friend),
+                      style: {
+                        flexDirection: "row", alignItems: "center",
+                        paddingVertical: 8, paddingHorizontal: 6,
+                        borderBottomWidth: 0.5, borderBottomColor: "rgba(255,255,255,0.06)",
+                      },
+                    },
+                      React.createElement(Image, {
+                        source: { uri: friend.avatarUrl },
+                        style: { width: 32, height: 32, borderRadius: 16, marginRight: 10, backgroundColor: "#333" },
+                      }),
+                      React.createElement(Text, { style: { color: "#fff", fontSize: 14 } }, friend.username)
+                    )
+                  )
+                )
+              ),
+          React.createElement(Text, { style: { color: "#555", fontSize: 10, marginTop: 4 } },
+            "Selecting a friend opens/finds your DM with them and exports the ENTIRE conversation (no message limit)."
+          )
+        ),
+
         React.createElement(Text, { style: { color: "#888", fontSize: 11, marginBottom: 4 } }, "Max messages"),
         React.createElement(TextInput, {
           value: maxMessages,
           onChangeText: setMaxMessages,
           keyboardType: "numeric",
-          editable: !exporting,
+          editable: !exporting && !exportAll,
           style: {
-            color: "#fff", backgroundColor: "rgba(255,255,255,0.07)",
+            color: exportAll ? "#555" : "#fff", backgroundColor: "rgba(255,255,255,0.07)",
             borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 13, marginBottom: 10, width: 100,
           },
         })
       ),
+      React.createElement(ToggleRow, {
+        label: "Export ALL messages (no limit)",
+        sub: "Ignores \"Max messages\" and fetches the channel's full history — can take a long time",
+        value: exportAll,
+        onToggle: setExportAll,
+        accent: "#F04747",
+      }),
       React.createElement(ToggleRow, {
         label: "Include images/videos",
         sub: "Downloads attachments into the ZIP too — bigger file, takes longer",
@@ -343,7 +436,7 @@ export default function MessageVaultSettings({ storage }) {
       React.createElement(View, { style: { padding: 12 } },
         React.createElement(TouchableOpacity, {
           disabled: exporting,
-          onPress: startExport,
+          onPress: () => startExport(),
           style: {
             backgroundColor: exporting ? "#444" : "#7289DA",
             borderRadius: 8, paddingVertical: 10, alignItems: "center",

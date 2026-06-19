@@ -43,8 +43,9 @@ https://cordinsanity.github.io/revenge-plugins/MessageVault/
 - Settings → Chat export lets you export a channel's full message history as a `.zip` file saved to your device's Downloads folder
 - Includes `messages.txt` (readable transcript), `messages.json` (raw data), and optionally a `media/` folder with downloaded images/videos
 - Useful for keeping evidence/backups of a conversation outside of Discord
-- Capped by a "Max messages" setting (default 1000) and requires confirming a warning before starting, since media-heavy or long chats can take a while and use noticeable storage/data
+- Capped by a "Max messages" setting (default 1000) and requires confirming a warning before starting, since media-heavy or long chats can take a while and use noticeable storage/data — or flip "Export ALL messages (no limit)" to ignore the cap and pull the channel's entire history
 - Needs a channel ID (Settings → Advanced → Developer Mode, then "Copy Channel ID" on a chat); it's pre-filled with whatever channel you had open when you opened MessageVault's settings
+- **👥 Pick a friend instead**: opens a searchable list of your friends (with their avatars) right in the export card — tapping one opens/finds your DM with them and immediately starts a full, unlimited export of that conversation
 
 ### Settings
 - Toggle delete logging, edit logging and the visible strike-through independently
@@ -63,6 +64,8 @@ https://cordinsanity.github.io/revenge-plugins/MessageVault/
 - Read receipts/unread counters may not perfectly reflect a "soft-deleted" message since the delete event is intercepted — this is a known trade-off of keeping the message visible.
 - Bulk deletions (`MESSAGE_DELETE_BULK`, e.g. mod purges) are logged but not restored visibly.
 - Chat export relies on Discord's internal REST module and a native file-writing module that can vary between app versions/platforms; if either isn't found, the export shows a clear error toast instead of saving a broken file.
+- The friend picker reads your friends list from Discord's internal relationship/user stores and opens DMs via the same internal REST module — same version-dependent caveat applies.
+- "Export ALL messages" can take a long time and use a lot of storage/data on very long or busy conversations — there's no upper bound once it's enabled.
 
 ---
 
